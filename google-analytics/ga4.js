@@ -19,13 +19,27 @@ if (window.gtag == null) {
 }
 
 const processGA4 = function() {
-    let properties = `${id} - ${name} - ${variationID} - ${variationName}`;
-​
-    window.gtag("event", eventName, {
-        "send_to": gtagMeasurementID,
-        "experiment_variation": properties, 
-        "event_timeout": 2000
-    });
+    if (window.gtag) {
+        // using the Google tag (gtag.js)
+        let properties = `${id} - ${name} - ${variationID} - ${variationName}`;
+        window.gtag("event", eventName, {
+            "send_to": gtagMeasurementID,
+            "experiment_variation": properties, 
+            "event_timeout": 2000
+        });
+    } else {
+        // using Google Tag Manager
+        window.dataLayer.push({
+            event: eventName,
+            campaign_name: name,
+            campaign_id: id,
+            variation_name: variationName,
+            variation_id: variationID
+        });
+    }
+
 }
 
-processGA4();
+Kameleoon.API.Core.runWhenConditionTrue(function() {
+    return window.gtag != null || window.dataLayer != null;
+}, processGA4, 150);
